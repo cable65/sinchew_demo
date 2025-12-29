@@ -1,0 +1,164 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// Multi-Tenancy Core
+// -----------------------------------------------------------------------------
+
+model Tenant {
+  id              String   @id @default(uuid())
+  name            String
+  slug            String   @unique
+  brandingConfig  Json?    @map("branding_config") // Logo, colors, fonts
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  users       User[]
+  newsSources NewsSource[]
+  articles    Article[]
+
+  @@map("tenants")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Hashed
+  tenantId  String   @map("tenant_id")
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+// -----------------------------------------------------------------------------
+// News Source Management
+// -----------------------------------------------------------------------------
+
+enum SourceType {
+  NEWS
+  BLOG
+  SOCIAL
+}
+
+enum UpdateFrequency {
+  HOURLY
+  DAILY
+  WEEKLY
+}
+
+model NewsSource {
+  id              String          @id @default(uuid())
+  tenantId        String          @map("tenant_id")
+  name            String
+  baseUrl         String          @map("base_url")
+  description     String?
+  type            SourceType
+  category        String
+  updateFrequency UpdateFrequency @default(HOURLY) @map("update_frequency")
+  lastFetchedAt   DateTime?       @map("last_fetched_at")
+  credentials     String?         // Encrypted JSON string
+  isActive        Boolean         @default(true) @map("is_active")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  articles Article[]
+
+  @@unique([tenantId, name])
+  @@map("news_sources")
+}
+
+// -----------------------------------------------------------------------------
+// Articles ingested from sources
+// -----------------------------------------------------------------------------
+
+model Article {
+  id          String   @id @default(uuid())
+  tenantId    String   @map("tenant_id")
+  sourceId    String   @map("source_id")
+  title       String
+  link        String
+  guid        String?
+  description String?
+  content     String?
+  imageUrl    String?  @map("image_url")
+  publishedAt DateTime? @map("published_at")
+  fetchedAt   DateTime  @default(now()) @map("fetched_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // Custom editorial fields
+  author      String?
+  tags        String[]  @default([])
+  status      ArticleStatus @default(PUBLISHED)
+  editorialLock Boolean @default(false) @map("editorial_lock")
+  slug        String?
+
+  // SEO fields
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+  seoKeywords    String? @map("seo_keywords")
+  canonicalUrl   String? @map("canonical_url")
+  ogTitle        String? @map("og_title")
+  ogDescription  String? @map("og_description")
+  ogImageUrl     String? @map("og_image_url")
+
+  // Relations
+  source NewsSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@index([tenantId, publishedAt])
+  @@unique([tenantId, link])
+  @@unique([tenantId, slug])
+  @@map("articles")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// -----------------------------------------------------------------------------
+// Audit Logging (Mandatory)
+// -----------------------------------------------------------------------------
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  timestamp    DateTime @default(now())
+  actorId      String   @map("actor_id")
+  actorRole    String   @map("actor_role")
+  action       String
+  resourceType String   @map("resource_type")
+  resourceId   String   @map("resource_id")
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  oldValue     Json?    @map("old_value")
+  newValue     Json?    @map("new_value")
+  metadata     Json?
+
+  @@index([timestamp])
+  @@index([actorId])
+  @@index([resourceType, resourceId])
+  @@map("audit_logs")
+}

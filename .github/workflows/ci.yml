@@ -1,0 +1,53 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Generate Prisma Client
+      run: npx prisma generate
+      env:
+        DATABASE_URL: "postgresql://dummy:dummy@localhost:5432/dummy" # Schema generation doesn't need real DB
+        
+    - name: Lint
+      run: npm run lint
+      
+    - name: Build
+      run: npm run build
+      
+    - name: Run Unit Tests
+      run: echo "Running tests..." # npm test (Add when tests are implemented)
+
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false # Set to true when registry is configured
+          tags: user/sinchew-demo:latest

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sinchew-app
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: sinchew-app
+  template:
+    metadata:
+      labels:
+        app: sinchew-app
+    spec:
+      containers:
+      - name: sinchew-app
+        image: user/sinchew-demo:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: DATABASE_URL
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 20
