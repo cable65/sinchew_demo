@@ -190,6 +190,7 @@ export default function EditArticlePage() {
       setSaveProgress(100)
       setSaveSuccess(true)
       clearInterval(timer)
+      setTimeout(() => setSaveSuccess(false), 2000)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save article')
     } finally {
@@ -202,13 +203,8 @@ export default function EditArticlePage() {
       <h1 className="text-3xl font-bold">Edit Article</h1>
 
       {loading && <p>Loading...</p>}
-      {saving && (
-        <div className="h-2 w-full rounded bg-gray-200">
-          <div className="h-2 rounded bg-blue-600" style={{ width: `${saveProgress}%` }} />
-        </div>
-      )}
       {saveSuccess && (
-        <div className="rounded border border-green-200 bg-green-50 p-2 text-sm text-green-700">Saved successfully</div>
+        <div className="fixed bottom-4 right-4 z-50 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-700 shadow">Saved successfully</div>
       )}
       {error && <p className="text-red-500">{error}</p>}
 
@@ -338,9 +334,16 @@ export default function EditArticlePage() {
               <label className="text-sm font-medium">OG Image URL</label>
               <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} />
             </div>
-            <div className="flex gap-2">
-              <Button onClick={save} disabled={saving}>Save</Button>
-              <Button variant="outline" onClick={() => router.push('/dashboard/articles')}>Cancel</Button>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Button onClick={save} disabled={saving}>{saving ? `Saving… ${saveProgress}%` : 'Save'}</Button>
+                <Button variant="outline" onClick={() => router.push('/dashboard/articles')}>Cancel</Button>
+              </div>
+              {saving && (
+                <div className="h-2 w-full rounded bg-gray-200">
+                  <div className="h-2 rounded bg-blue-600" style={{ width: `${saveProgress}%` }} />
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
