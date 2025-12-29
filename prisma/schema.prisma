@@ -130,7 +130,6 @@ model Article {
   @@index([sourceId])
   @@index([tenantId, publishedAt])
   @@unique([tenantId, link])
-  @@unique([tenantId, slug])
   @@map("articles")
 }
 
