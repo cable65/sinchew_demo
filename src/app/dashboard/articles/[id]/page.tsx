@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { RichTextEditor } from '@/components/editor/rich-text-editor'
 
 interface Article {
   id: string
@@ -56,6 +57,21 @@ export default function EditArticlePage() {
   const [grammarResult, setGrammarResult] = useState<any>(null)
   const [error, setError] = useState('')
   const router = useRouter()
+
+  const replaceText = (original: string, suggestion: string) => {
+    if (!content.includes(original)) {
+      alert('Could not find original text. It might have been modified already.')
+      return
+    }
+    const newContent = content.replace(original, suggestion)
+    setContent(newContent)
+    
+    // Update local grammar result to remove the fixed issue
+    setGrammarResult((prev: any) => ({
+      ...prev,
+      issues: prev.issues.filter((i: any) => i.original !== original)
+    }))
+  }
 
   useEffect(() => {
     if (!id) return
@@ -236,7 +252,9 @@ export default function EditArticlePage() {
                    {aiLoading ? 'Checking...' : 'Check Grammar (AI)'}
                  </Button>
               </div>
-              <textarea value={content} onChange={(e) => setContent(e.target.value)} className="mt-1 w-full rounded border p-2" rows={8} />
+              <div className="mt-1">
+                <RichTextEditor value={content} onChange={setContent} placeholder="Main article body" />
+              </div>
               
               {grammarResult && (
                 <div className="mt-4 rounded-md border bg-slate-50 p-4 text-sm">
@@ -249,15 +267,25 @@ export default function EditArticlePage() {
                     <div className="space-y-2">
                       {grammarResult.issues.map((issue: any, idx: number) => (
                         <div key={idx} className="rounded border bg-white p-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 flex-1">
                             <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${issue.severity === 'critical' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
                               {issue.severity}
                             </span>
-                            <span className="font-mono text-red-500 line-through">{issue.original}</span>
+                            <span className="font-mono text-red-500 line-through text-xs truncate max-w-[200px]">{issue.original}</span>
                             <span>→</span>
-                            <span className="font-mono text-green-600 font-medium">{issue.suggestion}</span>
+                            <span className="font-mono text-green-600 font-medium text-xs truncate max-w-[200px]">{issue.suggestion}</span>
                           </div>
-                          <p className="mt-1 text-xs text-muted-foreground">{issue.reason}</p>
+                          <Button 
+                            size="sm" 
+                            variant="secondary" 
+                            className="h-6 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100"
+                            onClick={() => replaceText(issue.original, issue.suggestion)}
+                          >
+                            Replace
+                          </Button>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{issue.reason}</p>
                         </div>
                       ))}
                     </div>

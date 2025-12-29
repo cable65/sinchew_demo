@@ -60,6 +60,7 @@ const updateSchema = z.object({
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
   ogImageUrl: z.preprocess((v) => (v === '' ? null : v), z.string().url().nullable().optional()),
+  publishedAt: z.string().datetime().optional().nullable(),
 })
 
 function slugify(s: string) {
@@ -103,6 +104,16 @@ export async function PATCH(
       }
     }
 
+    // Determine publishedAt
+    let publishedAtToUse = existing.publishedAt;
+    if (typeof data.publishedAt !== 'undefined') {
+        // User explicitly provided a value (or null)
+        publishedAtToUse = data.publishedAt ? new Date(data.publishedAt) : null;
+    } else if (data.status === 'PUBLISHED' && existing.status !== 'PUBLISHED' && !existing.publishedAt) {
+        // Auto-set if transitioning to PUBLISHED and no date set
+        publishedAtToUse = new Date();
+    }
+
     const updated = await prisma.article.update({
       where: { id },
       data: {
@@ -122,6 +133,7 @@ export async function PATCH(
         ogTitle: typeof data.ogTitle === 'string' ? data.ogTitle : existing.ogTitle,
         ogDescription: typeof data.ogDescription === 'string' ? data.ogDescription : existing.ogDescription,
         ogImageUrl: typeof data.ogImageUrl === 'string' ? data.ogImageUrl : existing.ogImageUrl,
+        publishedAt: publishedAtToUse,
       },
     })
 

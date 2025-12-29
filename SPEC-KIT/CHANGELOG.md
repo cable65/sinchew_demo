@@ -5,7 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.2] - 2025-12-29
+
+### Added (Settings & Dashboard)
+- **Settings Page**: Full implementation of user and tenant settings.
+  - Profile: Update display name.
+  - Security: Change password with validation.
+  - Organization (Admin): Update name and branding (logo, switch).
+  - System (Admin): Configure AI model and auto-publish settings.
+- **API**:
+  - `GET/PUT /api/user/profile`: Manage user profile.
+  - `PUT /api/user/password`: Change user password.
+  - `GET/PUT /api/tenant/settings`: Manage tenant settings (branding, system config).
+- **Database**:
+  - Added `name` field to `User` model.
+  - Added `systemConfig` field to `Tenant` model.
+  - Added `DB_SCHEMA.md` to SPEC-KIT.
+- **Dashboard Reports**:
+  - Added `DashboardStats` component with role-based filtering (Admin vs Editor).
+  - Added graph/table toggle and PDF/CSV export.
+
+### Changed
+- Updated `SettingsPage` UI to be interactive and connected to real APIs.
+- **Article Creation**: Relaxed validation for "DRAFT" status.
+  - Frontend: "Save as Draft" skips client-side validation for Title/Link (Source still required).
+  - Backend: Auto-fills "Untitled Draft" and placeholder Link if missing for drafts.
+  - Allows saving posts without any content verification in Draft mode.
+- **Article Editor**: Replaced TinyMCE with **Tiptap** (React 19 Compatible & MIT License).
+  - Replaced `RichTextEditor` component with Tiptap implementation.
+  - Added custom toolbar with formatting options (Bold, Italic, Headings, Lists, Links, Images).
+  - Removed TinyMCE dependencies and assets to resolve license warnings.
+  - Tiptap is headless and fully compatible with React 19.
+  - Added **Image Upload** (Drag & Drop or File Picker) directly in the editor.
+  - Added **Font Styling**: Font Family selector and Text Color picker.
+  - Added **Text Alignment**: Left, Center, Right, Justify alignment options.
+  - Added **Source View**: Toggle between WYSIWYG and raw HTML source code.
+  - Fixed **Preview Styling**: Installed `@tailwindcss/typography` to ensure Headings and Lists render correctly.
+- **AI Grammar Check**: Improved UX for grammar suggestions.
+  - Updated AI prompt to handle HTML content and return exact HTML snippets for replacement.
+  - Added **Replace** button to each grammar issue card in the editor.
+  - Implemented automatic text replacement logic in the editor.
+  - Improved UI for issue display (truncate long text, better spacing).
+
+### Fixed
+- **Article Publishing Date**: Fixed issue where `publishedAt` remained null when updating an article from "DRAFT" to "PUBLISHED". Now automatically sets to current time if missing.
+- **Article Update API**: Added `publishedAt` to update schema to allow manual date adjustments.
+- **Data Integrity**: Manually backfilled `publishedAt` for existing published articles with missing dates.
+
+## [0.1.1] - 2025-12-29
 
 ### Added
 - Initial project setup with Next.js 15, React 19, TypeScript, Tailwind CSS.

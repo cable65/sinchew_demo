@@ -19,6 +19,7 @@ model Tenant {
   name            String
   slug            String   @unique
   brandingConfig  Json?    @map("branding_config") // Logo, colors, fonts
+  systemConfig    Json?    @map("system_config")   // AI settings, auto-publish rules
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
@@ -38,6 +39,7 @@ enum UserRole {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  name      String?
   password  String   // Hashed
   tenantId  String   @map("tenant_id")
   role      UserRole @default(VIEWER)
@@ -45,6 +47,8 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  createdArticles Article[] @relation("ArticleCreator")
 
   @@index([tenantId])
   @@map("users")
@@ -127,6 +131,8 @@ model Article {
   // Relations
   source NewsSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   tenant Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  creator User?     @relation("ArticleCreator", fields: [creatorId], references: [id])
+  creatorId String? @map("creator_id")
 
   @@index([sourceId])
   @@index([tenantId, publishedAt])

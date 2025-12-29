@@ -31,6 +31,45 @@ A comprehensive, multi-tenant news aggregator CMS platform designed for scalabil
 - **Security**: API Key management, Rate limiting.
 - **Webhooks**: Event-driven notifications.
 
+### 3.5 Article Management
+- **Creation**: Supports manual creation and automated ingestion (RSS).
+- **Draft Mode**: Allows saving drafts with minimal validation (auto-fills required DB fields with placeholders).
+- **Publishing**: Enforces strict validation (Title, Link required) before status transition to PUBLISHED.
+- **Editing**: Full WYSIWYG editing using **Tiptap** (Headless, React-friendly, MIT) with version history (via Audit Logs).
+  - **Features**: 
+    - Text Formatting: Bold, Italic, Strike, Headings (H1-H3).
+    - Alignment: Left, Center, Right, Justify.
+    - Advanced Styling: Font Family (Arial, Georgia, etc.), Text Color.
+    - Media: Image Upload (Local & URL), Link management.
+    - Lists: Bullet, Ordered.
+    - View Modes: Visual Editor & Source Code View (with toggle).
+- **AI Grammar Check**:
+  - Analyzes HTML content for errors and improvements.
+- **Dashboard & Reporting**:
+  - **Admin View**:
+    - Total articles statistics (Today, 7d, 30d, 365d, All).
+    - Breakdown by Content Status.
+  - **Editor View**:
+    - "My Articles" statistics (Today, 7d, 30d, 365d, All).
+    - Breakdown of own articles by Content Status.
+  - **Display**: Toggle between Graph (Charts) and Table views.
+  - **Export**: PDF and CSV export options for reports.
+  - Returns structured issues with one-click "Replace" functionality.
+  - Handles HTML tags intelligently during replacement.
+- **Settings Management**:
+  - **Profile Settings** (All Users):
+    - Update Display Name.
+    - Change Password (Securely hashed).
+    - Notification Preferences.
+  - **Organization Settings** (Admin Only):
+    - Site Name & Description.
+    - Branding (Logo URL, Primary Color).
+    - Timezone & Date Format.
+  - **System Configuration** (Admin Only):
+    - AI Model Configuration.
+    - Content Ingestion Rules (Default frequency).
+- **SEO**: Dedicated fields for SEO metadata and OpenGraph tags.
+
 ## 4. Non-Functional Requirements
 - **Performance**: <500ms API response (95th percentile).
 - **Reliability**: 99.9% Uptime.

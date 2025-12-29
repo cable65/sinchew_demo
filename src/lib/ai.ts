@@ -54,16 +54,20 @@ export async function generateSeoSuggestions(title: string, content: string) {
 
 export async function checkGrammar(content: string) {
   const prompt = `
-    Proofread the following text (which may be in English, Chinese, or mixed).
+    Proofread the following HTML content (English/Chinese).
     Identify grammar errors, typos, and awkward phrasing.
-    Focus on professional journalistic standards.
+    
+    IMPORTANT: 
+    1. The input is HTML. The "original" and "suggestion" fields MUST be exact HTML snippets from the source so they can be programmatically replaced.
+    2. Do NOT change HTML tags unless the tag itself is incorrect.
+    3. If the error spans multiple tags, include the full tags in "original" and "suggestion".
     
     Return the response in JSON format with the following structure:
     {
       "issues": [
         {
-          "original": "text with error",
-          "suggestion": "corrected text",
+          "original": "exact html snippet with error",
+          "suggestion": "corrected html snippet",
           "reason": "explanation of the error",
           "severity": "critical" | "suggestion"
         }
@@ -73,13 +77,13 @@ export async function checkGrammar(content: string) {
     
     If there are no issues, return an empty "issues" array.
     
-    Text to check (first 4000 chars):
+    HTML Content to check (first 4000 chars):
     ${content.slice(0, 4000)}
   `
 
   const response = await client.chat.completions.create({
     messages: [
-      { role: "system", content: "You are a professional editor proficient in Chinese and English. You always respond in valid JSON." },
+      { role: "system", content: "You are a professional editor. You verify HTML content and return JSON." },
       { role: "user", content: prompt }
     ],
     model: MODEL,

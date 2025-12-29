@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { RichTextEditor } from '@/components/editor/rich-text-editor'
 
 interface NewsSource {
   id: string
@@ -55,10 +56,20 @@ export default function CreateArticlePage() {
   }, [])
 
   const save = async () => {
-    if (!sourceId || !title || !link) {
-      setError('Source, Title, and Link are required')
-      return
+    // Only validate required fields if not a draft
+    if (status !== 'DRAFT') {
+      if (!sourceId || !title || !link) {
+        setError('Source, Title, and Link are required for published articles')
+        return
+      }
+    } else {
+      // For drafts, we still need a sourceId for the database relation
+      if (!sourceId) {
+        setError('Please select a Source (required even for drafts)')
+        return
+      }
     }
+
     setSaving(true)
     setError('')
     try {
@@ -117,12 +128,12 @@ export default function CreateArticlePage() {
               </select>
             </div>
             <div>
-              <label className="text-sm font-medium">Title <span className="text-red-500">*</span></label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+              <label className="text-sm font-medium">Title {status !== 'DRAFT' && <span className="text-red-500">*</span>}</label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={status === 'DRAFT' ? 'Optional for Drafts' : ''} />
             </div>
              <div>
-              <label className="text-sm font-medium">Link (Original URL) <span className="text-red-500">*</span></label>
-              <Input value={link} onChange={(e) => setLink(e.target.value)} />
+              <label className="text-sm font-medium">Link (Original URL) {status !== 'DRAFT' && <span className="text-red-500">*</span>}</label>
+              <Input value={link} onChange={(e) => setLink(e.target.value)} placeholder={status === 'DRAFT' ? 'Optional for Drafts' : ''} />
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
@@ -130,7 +141,9 @@ export default function CreateArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">Content</label>
-              <textarea value={content} onChange={(e) => setContent(e.target.value)} className="mt-1 w-full rounded border p-2" rows={8} />
+              <div className="mt-1">
+                <RichTextEditor value={content} onChange={setContent} placeholder={status === 'DRAFT' ? 'Optional for Drafts' : 'Main article body'} />
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium">Image URL</label>
