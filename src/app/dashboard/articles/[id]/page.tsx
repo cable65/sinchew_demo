@@ -50,6 +50,8 @@ export default function EditArticlePage() {
   const [ogImageUrl, setOgImageUrl] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveProgress, setSaveProgress] = useState(0)
+  const [saveSuccess, setSaveSuccess] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
   const [grammarResult, setGrammarResult] = useState<any>(null)
   const [error, setError] = useState('')
@@ -86,6 +88,20 @@ export default function EditArticlePage() {
       }
     })()
   }, [id])
+
+  function slugify(s: string) {
+    return s
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '')
+      .slice(0, 120)
+  }
+
+  useEffect(() => {
+    if (!slug) {
+      setSlug(slugify(title))
+    }
+  }, [title])
 
   const generateSeo = async () => {
     if (!title && !content) return
@@ -139,8 +155,14 @@ export default function EditArticlePage() {
   const save = async () => {
     if (!article) return
     setSaving(true)
+    setSaveSuccess(false)
+    setSaveProgress(0)
     setError('')
     try {
+      const computedSlug = slug.trim() ? slug : slugify(title)
+      const timer = setInterval(() => {
+        setSaveProgress((p) => (p < 95 ? p + 5 : p))
+      }, 150)
       const res = await fetch(`/api/articles/${article.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -153,7 +175,7 @@ export default function EditArticlePage() {
           tags: tagsCsv.split(',').map(t => t.trim()).filter(Boolean),
           status,
           editorialLock,
-          slug,
+          slug: computedSlug || undefined,
           seoTitle,
           seoDescription,
           seoKeywords,
@@ -165,7 +187,9 @@ export default function EditArticlePage() {
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data?.error || 'Failed to save article')
-      router.push('/dashboard/articles')
+      setSaveProgress(100)
+      setSaveSuccess(true)
+      clearInterval(timer)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to save article')
     } finally {
@@ -178,6 +202,14 @@ export default function EditArticlePage() {
       <h1 className="text-3xl font-bold">Edit Article</h1>
 
       {loading && <p>Loading...</p>}
+      {saving && (
+        <div className="h-2 w-full rounded bg-gray-200">
+          <div className="h-2 rounded bg-blue-600" style={{ width: `${saveProgress}%` }} />
+        </div>
+      )}
+      {saveSuccess && (
+        <div className="rounded border border-green-200 bg-green-50 p-2 text-sm text-green-700">Saved successfully</div>
+      )}
       {error && <p className="text-red-500">{error}</p>}
 
       {article && (

@@ -90,7 +90,9 @@ export async function PATCH(
     })
     if (!existing) return NextResponse.json({ error: 'Not Found' }, { status: 404 })
 
-    const slugToUse = typeof data.slug === 'string' ? slugify(data.slug) : existing.slug || undefined
+    const slugToUse = typeof data.slug === 'string' && data.slug.trim().length
+      ? slugify(data.slug)
+      : (existing.slug || (typeof data.title === 'string' && !existing.slug ? slugify(data.title) : undefined))
     if (slugToUse) {
       const conflict = await prisma.article.findFirst({
         where: { tenantId: user.tenantId, slug: slugToUse, NOT: { id } },
