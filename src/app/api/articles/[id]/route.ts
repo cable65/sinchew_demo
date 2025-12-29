@@ -45,14 +45,21 @@ const updateSchema = z.object({
   tags: z.array(z.string()).optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
   editorialLock: z.boolean().optional(),
-  slug: z.string().min(1).optional(),
+  slug: z
+    .preprocess((v) => {
+      if (typeof v === 'string') {
+        const t = v.trim()
+        return t.length ? t : undefined
+      }
+      return v
+    }, z.string().min(1).optional()),
   seoTitle: z.string().optional(),
   seoDescription: z.string().optional(),
   seoKeywords: z.string().optional(),
-  canonicalUrl: z.string().url().optional(),
+  canonicalUrl: z.preprocess((v) => (v === '' ? null : v), z.string().url().nullable().optional()),
   ogTitle: z.string().optional(),
   ogDescription: z.string().optional(),
-  ogImageUrl: z.string().url().optional(),
+  ogImageUrl: z.preprocess((v) => (v === '' ? null : v), z.string().url().nullable().optional()),
 })
 
 function slugify(s: string) {
