@@ -105,6 +105,7 @@ export default function CreateSourcePage() {
                   <option value="HOURLY">Hourly</option>
                   <option value="DAILY">Daily</option>
                   <option value="WEEKLY">Weekly</option>
+                  <option value="MANUAL">Manually / No update</option>
                 </select>
               </div>
             </div>

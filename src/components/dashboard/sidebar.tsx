@@ -19,7 +19,7 @@ export function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col border-r bg-gray-100/40 dark:bg-gray-800/40">
       <div className="flex h-14 items-center border-b px-6">
-        <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
+        <Link href="/dashboard" prefetch={false} className="flex items-center gap-2 font-semibold">
           <span className="text-xl font-bold">SinChew CMS</span>
         </Link>
       </div>
@@ -31,6 +31,7 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary",
                   pathname === item.href

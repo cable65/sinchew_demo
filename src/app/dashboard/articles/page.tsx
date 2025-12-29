@@ -72,7 +72,7 @@ export default function ArticlesPage() {
             <Button type="submit" variant="outline">Search</Button>
           </form>
           <Button asChild>
-            <Link href="/dashboard/articles/create">Create Article</Link>
+            <Link href="/dashboard/articles/create" prefetch={false}>Create Article</Link>
           </Button>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function ArticlesPage() {
                   <TableCell>{a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Unpublished'}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/dashboard/articles/${a.id}`}>Edit</Link>
+                      <Link href={`/dashboard/articles/${a.id}`} prefetch={false}>Edit</Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild className="ml-2">
                       <a href={a.link} target="_blank" rel="noreferrer">Original</a>

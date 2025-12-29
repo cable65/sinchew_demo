@@ -13,7 +13,7 @@ interface NewsSource {
   type: string
   category: string
   updateFrequency: string
-  lastFetchAt: string | null
+  lastFetchedAt?: string | null
   createdAt: string
 }
 
@@ -28,8 +28,9 @@ export default function SourcesPage() {
     try {
       const res = await fetch('/api/sources')
       if (!res.ok) throw new Error('Failed to fetch sources')
-      const data = await res.json()
-      setSources(data)
+      const payload = await res.json()
+      const items = Array.isArray(payload) ? payload : (payload?.data ?? [])
+      setSources(items as NewsSource[])
     } catch (err) {
       setError('Failed to load sources')
     } finally {
@@ -48,7 +49,7 @@ export default function SourcesPage() {
       }
       fetchSources()
     } catch (err) {
-      const msg = (err as any)?.message || 'Failed to sync source'
+      const msg = err instanceof Error ? err.message : 'Failed to sync source'
       alert(msg)
     } finally {
       setSyncingId(null)
@@ -64,7 +65,7 @@ export default function SourcesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">News Sources</h1>
         <Button asChild>
-          <Link href="/dashboard/sources/create">
+          <Link href="/dashboard/sources/create" prefetch={false}>
             <Plus className="mr-2 h-4 w-4" />
             Add Source
           </Link>
@@ -109,23 +110,28 @@ export default function SourcesPage() {
                     <span>{source.category}</span>
                     <span>{source.updateFrequency}</span>
                   </div>
-                  {source.lastFetchAt && (
+                  {source.lastFetchedAt && (
                     <p className="mt-2 text-xs">
-                      Last fetch: {new Date(source.lastFetchAt).toLocaleString()}
+                      Last fetch: {new Date(source.lastFetchedAt).toLocaleString()}
                     </p>
                   )}
-                  {source.type === 'NEWS' && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2 w-full justify-start px-0"
-                      onClick={() => handleSync(source.id)}
-                      disabled={syncingId === source.id}
-                    >
-                      <RefreshCw className={`mr-2 h-4 w-4 ${syncingId === source.id ? 'animate-spin' : ''}`} />
-                      Sync
+                  <div className="mt-2 flex gap-2">
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/dashboard/sources/${source.id}`} prefetch={false}>Edit</Link>
                     </Button>
-                  )}
+                    {source.type === 'NEWS' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start px-0"
+                        onClick={() => handleSync(source.id)}
+                        disabled={syncingId === source.id}
+                      >
+                        <RefreshCw className={`mr-2 h-4 w-4 ${syncingId === source.id ? 'animate-spin' : ''}`} />
+                        Sync
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

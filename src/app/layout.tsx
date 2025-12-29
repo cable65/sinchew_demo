@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import pkg from "../../package.json";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,12 +23,21 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const version = pkg.version || "0.0.0";
+  const sha = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA || process.env.VERCEL_GIT_COMMIT_SHA || "";
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <div className="min-h-screen flex flex-col">
+          <main className="flex-1">{children}</main>
+          <footer className="border-t bg-white dark:bg-black text-xs text-zinc-600 dark:text-zinc-400">
+            <div className="mx-auto w-full max-w-7xl px-4 py-2">
+              <span className="font-mono">v{version}{sha ? ` • ${String(sha).slice(0, 7)}` : ""}</span>
+            </div>
+          </footer>
+        </div>
       </body>
     </html>
   );

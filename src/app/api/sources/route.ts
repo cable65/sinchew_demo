@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
   })
 
-  return NextResponse.json(sources)
+  return NextResponse.json({ data: sources })
 }
 
 export async function POST(req: NextRequest) {

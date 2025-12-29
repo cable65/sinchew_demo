@@ -64,6 +64,7 @@ enum UpdateFrequency {
   HOURLY
   DAILY
   WEEKLY
+  MANUAL
 }
 
 model NewsSource {
