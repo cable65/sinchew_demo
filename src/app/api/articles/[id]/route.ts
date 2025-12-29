@@ -163,8 +163,8 @@ export async function PATCH(
         resourceId: id,
         ipAddress: req.headers.get('x-forwarded-for') || 'unknown',
         userAgent: req.headers.get('user-agent') || 'unknown',
-        oldValue,
-        newValue,
+        oldValue: oldValue as any,
+        newValue: newValue as any,
       },
     })
 
