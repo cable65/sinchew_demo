@@ -16,6 +16,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Improved empty state handling: Displays "No data available" only when the entire dataset is empty (e.g., no articles at all), otherwise shows a continuous trend line (including zero-count days).
   - Fixed Recharts rendering issue by wrapping `ResponsiveContainer` in an explicit height container inside `TabsContent`.
 
+### Added (Architecture)
+- **API Infrastructure**:
+  - Implemented `middleware.ts` for **CORS**, **Security Headers** (HSTS, X-Frame-Options), and basic **Rate Limiting** (100 req/min).
+  - Added `/api/health` endpoint for system monitoring (database connection check).
+  - Added `/api/graphql` placeholder endpoint for future GraphQL support.
+  - Created `src/lib/api-response.ts` for standardized JSON response format.
+- **Documentation**:
+  - Created `public/openapi.yaml` (OpenAPI 3.1 Spec) for comprehensive API documentation.
+  - Updated `SPEC-KIT/API_CONTRACT.md` to reference the new OpenAPI spec and response standards.
+
 ## [0.1.4] - 2025-12-30
 
 ### Added

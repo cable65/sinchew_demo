@@ -1,11 +1,35 @@
 # API Contract
 
+## Specification
+**OpenAPI 3.1 Spec**: [public/openapi.yaml](../public/openapi.yaml)
+This project follows the OpenAPI 3.1 standard. Please refer to the YAML file for the most up-to-date documentation.
+
 ## Base URL
 `/api`
+
+## Security & Middleware
+- **Rate Limiting**: 100 requests per minute per IP (Middleware enforced).
+- **CORS**: Allowed for all origins (configurable).
+- **Security Headers**: HSTS, X-Frame-Options, X-Content-Type-Options, etc.
 
 ## Authentication
 - **Type**: Bearer Token (JWT) or Cookie (`token`)
 - **Header**: `Authorization: Bearer <token>`
+
+## Response Format
+All API responses follow this standard JSON structure:
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "page": 1,
+    "limit": 10,
+    "total": 100
+  },
+  "error": null
+}
+```
 
 ## Endpoints
 
@@ -14,10 +38,13 @@
 |--------|----------|-------------|---------------|
 | POST   | `/auth/login` | User login (returns JWT + HttpOnly Cookie) | No |
 
-### Health
+### Health & Monitoring
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
 | GET    | `/health` | System health status (Database connection check) | No |
+| GET/POST | `/graphql` | GraphQL Endpoint (Placeholder) | No |
+
+### Tenants
 
 ### Tenants
 | Method | Endpoint | Description | Auth Required |
