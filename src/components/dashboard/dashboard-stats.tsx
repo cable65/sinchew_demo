@@ -216,8 +216,13 @@ export function DashboardStats() {
             </TabsList>
             
             <TabsContent value="graph" className="h-[350px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.trend}>
+              {data.trend.length === 0 ? (
+                <div className="flex h-full w-full items-center justify-center border rounded-md bg-muted/10 text-muted-foreground">
+                  No data available for this period
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data.trend}>
                   <defs>
                     <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
@@ -247,6 +252,7 @@ export function DashboardStats() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              )}
             </TabsContent>
             
             <TabsContent value="table">

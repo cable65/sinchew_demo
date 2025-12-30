@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Deployment**:
   - Fixed TypeScript error in `src/lib/audit.ts` where `Record<string, unknown>` was incompatible with Prisma's `InputJsonValue`.
   - Resolved `Next.js build worker exited with code: 1` during Vercel deployment.
+- **Dashboard**:
+  - Fixed blank "Article Trends" graph view when no data is available. Now displays a descriptive "No data available for this period" message instead of an empty chart.
 
 ## [0.1.4] - 2025-12-30
 
