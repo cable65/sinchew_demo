@@ -33,9 +33,9 @@ export interface AuditLogParams {
   resourceId: string
   ipAddress?: string
   userAgent?: string
-  oldValue?: Record<string, unknown>
-  newValue?: Record<string, unknown>
-  metadata?: Record<string, unknown>
+  oldValue?: any
+  newValue?: any
+  metadata?: any
 }
 
 /**
