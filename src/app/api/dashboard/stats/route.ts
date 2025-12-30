@@ -97,34 +97,69 @@ export async function GET(req: NextRequest) {
     // Aggregate
     const trendMap = new Map<string, number>()
 
-    articles.forEach(a => {
-      let key: string
-      const d = new Date(a.createdAt)
-      
-      if (range === 'today') {
-        // Hourly: "HH:00"
-        key = `${d.getHours().toString().padStart(2, '0')}:00`
-      } else if (range === '365d' || range === 'all') {
-        // Monthly: "YYYY-MM" (or maybe Daily is still fine for 365? Let's do Monthly for 365/all to reduce points)
-        // Actually user might want granularity. Let's do Daily for 365d too, charts can handle 365 points.
-        // For "All", it could be years. Let's stick to Daily YYYY-MM-DD for consistency unless 'today'.
-        key = d.toISOString().split('T')[0]
-      } else {
-        // Daily: "YYYY-MM-DD"
-        key = d.toISOString().split('T')[0]
+    const formatDateKey = (d: Date, r: string) => {
+      if (r === 'today') {
+        return `${d.getHours().toString().padStart(2, '0')}:00`
+      }
+      return d.toISOString().split('T')[0]
+    }
+
+    // Pre-fill keys with 0 to ensure continuous graph
+    if (range === 'today') {
+      for (let i = 0; i < 24; i++) {
+        trendMap.set(`${i.toString().padStart(2, '0')}:00`, 0)
+      }
+    } else {
+      let current = new Date(startDate || new Date())
+      const end = new Date()
+      end.setHours(0, 0, 0, 0)
+
+      if (range === 'all') {
+        if (articles.length > 0) {
+          current = new Date(articles[0].createdAt)
+        } else {
+          // If no articles at all, we can't determine a range for "all".
+          // We'll leave the map empty, resulting in an empty trend array.
+          // The frontend will show "No data available".
+          current = new Date(end.getTime() + 1) // Force skip loop
+        }
       }
 
-      trendMap.set(key, (trendMap.get(key) || 0) + 1)
-    })
+      current.setHours(0, 0, 0, 0)
+      
+      // Safety limit for 'all' to prevent massive loops (e.g. bad dates)
+      // Limit to 5 years?
+      const safetyLimit = 365 * 5
+      let loopCount = 0
 
-    // Fill in gaps? Optional. For now, just return what we have.
-    // Ideally we should fill 0s for missing days/hours.
+      while (current <= end && loopCount < safetyLimit) {
+        trendMap.set(formatDateKey(current, range), 0)
+        current.setDate(current.getDate() + 1)
+        loopCount++
+      }
+    }
+
+    // Fill with actual data
+    articles.forEach(a => {
+      const d = new Date(a.createdAt)
+      const key = formatDateKey(d, range)
+      if (trendMap.has(key)) {
+        trendMap.set(key, (trendMap.get(key) || 0) + 1)
+      } else {
+        // For 'all' or edge cases where date might be outside pre-filled range (shouldn't happen with correct logic)
+        // We add it to ensure data isn't lost
+        trendMap.set(key, (trendMap.get(key) || 0) + 1)
+      }
+    })
     
-    // Convert map to array
-    const trend = Array.from(trendMap.entries()).map(([date, count]) => ({
-      date,
-      count
-    }))
+    // Sort by date key to ensure chronological order (Map insertion order is usually preserved but explicit sort is safer)
+    // Actually, we inserted in order, so Map order is correct.
+    // But 'all' fallback or extra keys might be out of order.
+    // Let's sort the final array.
+    
+    const trend = Array.from(trendMap.entries())
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date))
 
     return NextResponse.json({
       range,
