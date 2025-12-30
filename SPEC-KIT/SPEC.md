@@ -43,6 +43,13 @@ A comprehensive, multi-tenant news aggregator CMS platform designed for scalabil
     - Media: Image Upload (Local & URL), Link management.
     - Lists: Bullet, Ordered.
     - View Modes: Visual Editor & Source Code View (with toggle).
+- **Category Management**:
+  - Dynamic category creation and management per tenant.
+  - Admin interface for adding/removing categories.
+- **Editorial Controls**:
+  - **Editorial Lock**: Articles can be locked to prevent accidental or unauthorized edits.
+  - **Image Upload**: Integrated image uploading with validation for optimized web delivery (1200x630px, <2MB).
+  - **SEO Sync**: Automatic bidirectional synchronization between Article Tags and SEO Keywords.
 - **AI Grammar Check**:
   - Analyzes HTML content for errors and improvements.
 - **Dashboard & Reporting**:

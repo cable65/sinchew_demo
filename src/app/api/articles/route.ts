@@ -1,22 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getAuthContext } from '@/lib/auth'
 import { z } from 'zod'
 import crypto from 'crypto'
-
-async function getAuthContext(req: NextRequest) {
-  const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1]
-  if (!token) return null
-
-  const payload = await verifyToken(token)
-  if (!payload) return null
-
-  const user = await prisma.user.findUnique({
-    where: { id: payload.userId as string },
-    include: { tenant: true },
-  })
-  return user
-}
 
 export async function GET(req: NextRequest) {
   console.log('GET /api/articles called')
@@ -87,6 +73,7 @@ const createSchema = z.object({
   description: z.string().optional(),
   content: z.string().optional(),
   imageUrl: z.string().url().nullable().optional().or(z.literal('')),
+  categoryId: z.string().optional().nullable(),
   author: z.string().optional(),
   tags: z.array(z.string()).optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
@@ -109,6 +96,7 @@ const draftSchema = z.object({
   description: z.string().optional(),
   content: z.string().optional(),
   imageUrl: z.string().optional().nullable(),
+  categoryId: z.string().optional().nullable(),
   author: z.string().optional(),
   tags: z.array(z.string()).optional(),
   status: z.literal('DRAFT'),
@@ -189,9 +177,10 @@ export async function POST(req: NextRequest) {
         description: data.description,
         content: data.content,
         imageUrl: data.imageUrl,
+        categoryId: data.categoryId,
         author: data.author,
         creatorId: user.id, // Track creator for "My Articles"
-        tags: data.tags,
+        tags: Array.isArray(data.tags) ? data.tags : (typeof data.seoKeywords === 'string' ? data.seoKeywords.split(',').map((t) => t.trim()).filter(Boolean) : undefined),
         status: data.status || 'DRAFT',
         editorialLock: data.editorialLock || false,
         slug: slugToUse,

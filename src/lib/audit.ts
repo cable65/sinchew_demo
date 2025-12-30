@@ -5,6 +5,12 @@ export type AuditAction =
   | 'USER_LOGOUT'
   | 'USER_REGISTER'
   | 'USER_UPDATE'
+  | 'USER_CREATE'
+  | 'USER_ROLE_UPDATE'
+  | 'USER_DELETE'
+  | 'CATEGORY_CREATE'
+  | 'CATEGORY_UPDATE'
+  | 'CATEGORY_DELETE'
   | 'PASSWORD_CHANGE'
   | 'TENANT_CREATE'
   | 'TENANT_UPDATE'
@@ -27,9 +33,9 @@ export interface AuditLogParams {
   resourceId: string
   ipAddress?: string
   userAgent?: string
-  oldValue?: Record<string, any>
-  newValue?: Record<string, any>
-  metadata?: Record<string, any>
+  oldValue?: Record<string, unknown>
+  newValue?: Record<string, unknown>
+  metadata?: Record<string, unknown>
 }
 
 /**

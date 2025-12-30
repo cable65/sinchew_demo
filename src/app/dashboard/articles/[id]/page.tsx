@@ -4,6 +4,7 @@ import { useEffect, useState, use } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { RichTextEditor } from '@/components/editor/rich-text-editor'
 
@@ -28,15 +29,22 @@ interface Article {
   ogImageUrl?: string | null
 }
 
+interface Category {
+  id: string
+  name: string
+}
+
 export default function EditArticlePage() {
   const params = useParams()
   const id = params?.id as string
   
   const [article, setArticle] = useState<Article | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const [author, setAuthor] = useState('')
   const [tagsCsv, setTagsCsv] = useState('')
   const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('PUBLISHED')
@@ -77,26 +85,37 @@ export default function EditArticlePage() {
     if (!id) return
     (async () => {
       try {
-        const res = await fetch(`/api/articles/${id}`)
-        const data = await res.json()
-        if (!res.ok) throw new Error(data?.error || 'Failed to load article')
-        setArticle(data.data)
-        setTitle(data.data.title || '')
-        setDescription(data.data.description || '')
-        setContent(data.data.content || '')
-        setImageUrl(data.data.imageUrl || '')
-        setAuthor(data.data.author || '')
-        setTagsCsv((data.data.tags || []).join(','))
-        setStatus((data.data.status as any) || 'PUBLISHED')
-        setEditorialLock(Boolean(data.data.editorialLock))
-        setSlug(data.data.slug || '')
-        setSeoTitle(data.data.seoTitle || '')
-        setSeoDescription(data.data.seoDescription || '')
-        setSeoKeywords(data.data.seoKeywords || '')
-        setCanonicalUrl(data.data.canonicalUrl || '')
-        setOgTitle(data.data.ogTitle || '')
-        setOgDescription(data.data.ogDescription || '')
-        setOgImageUrl(data.data.ogImageUrl || '')
+        const [articleRes, catRes] = await Promise.all([
+          fetch(`/api/articles/${id}`),
+          fetch('/api/categories')
+        ])
+        const data = await articleRes.json()
+        const catData = await catRes.json()
+
+        if (catData.data) {
+          setCategories(catData.data)
+        }
+
+        if (data.data) {
+          setArticle(data.data)
+          setTitle(data.data.title || '')
+          setDescription(data.data.description || '')
+          setContent(data.data.content || '')
+          setImageUrl(data.data.imageUrl || '')
+          setCategoryId(data.data.categoryId || '')
+          setAuthor(data.data.author || '')
+          setTagsCsv((data.data.tags || []).join(','))
+          setStatus((data.data.status as any) || 'PUBLISHED')
+          setEditorialLock(Boolean(data.data.editorialLock))
+          setSlug(data.data.slug || '')
+          setSeoTitle(data.data.seoTitle || '')
+          setSeoDescription(data.data.seoDescription || '')
+          setSeoKeywords(data.data.seoKeywords || '')
+          setCanonicalUrl(data.data.canonicalUrl || '')
+          setOgTitle(data.data.ogTitle || '')
+          setOgDescription(data.data.ogDescription || '')
+          setOgImageUrl(data.data.ogImageUrl || '')
+        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load article')
       } finally {
@@ -134,7 +153,9 @@ export default function EditArticlePage() {
       if (data.data) {
         setSeoTitle(data.data.seoTitle || '')
         setSeoDescription(data.data.seoDescription || '')
-        setSeoKeywords(data.data.seoKeywords || '')
+        const kw = data.data.seoKeywords || ''
+        setSeoKeywords(kw)
+        setTagsCsv(kw)
         // Also pre-fill OG tags if empty
         if (!ogTitle) setOgTitle(data.data.seoTitle || '')
         if (!ogDescription) setOgDescription(data.data.seoDescription || '')
@@ -187,14 +208,15 @@ export default function EditArticlePage() {
           description,
           content,
           imageUrl: imageUrl || null,
+          categoryId: categoryId || null,
           author,
-          tags: tagsCsv.split(',').map(t => t.trim()).filter(Boolean),
+          tags: (seoKeywords || tagsCsv).split(',').map(t => t.trim()).filter(Boolean),
           status,
           editorialLock,
           slug: computedSlug || undefined,
           seoTitle,
           seoDescription,
-          seoKeywords,
+          seoKeywords: (tagsCsv || seoKeywords),
           canonicalUrl,
           ogTitle,
           ogDescription,
@@ -236,7 +258,7 @@ export default function EditArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">Description</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full rounded border p-2" rows={4} />
+              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" rows={4} />
             </div>
             <div>
               <label className="text-sm font-medium">Content</label>
@@ -297,15 +319,36 @@ export default function EditArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">Image URL</label>
-              <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+              <div className="flex items-center gap-2">
+                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    try {
+                      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                      const data = await res.json()
+                      if (data.url) setImageUrl(data.url)
+                    } catch {}
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Recommended 1200×630 JPG/PNG, under 2MB.</p>
             </div>
             <div>
-              <label className="text-sm font-medium">Author</label>
-              <Input value={author} onChange={(e) => setAuthor(e.target.value)} />
+              <label className="text-sm font-medium">Category</label>
+              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="mt-1 w-full rounded border p-2">
+                <option value="">Select a category</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </div>
             <div>
-              <label className="text-sm font-medium">Tags (comma separated)</label>
-              <Input value={tagsCsv} onChange={(e) => setTagsCsv(e.target.value)} />
+              <label className="text-sm font-medium">Tags / SEO Keywords (comma separated)</label>
+              <Input value={tagsCsv} onChange={(e) => { setTagsCsv(e.target.value); setSeoKeywords(e.target.value) }} />
             </div>
             <div>
               <label className="text-sm font-medium">Status</label>
@@ -340,11 +383,11 @@ export default function EditArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">SEO Description</label>
-              <textarea value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} className="mt-1 w-full rounded border p-2" rows={4} />
+              <Textarea value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} className="mt-1" rows={4} />
             </div>
             <div>
               <label className="text-sm font-medium">SEO Keywords (comma separated)</label>
-              <Input value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} />
+              <Input value={seoKeywords} onChange={(e) => { setSeoKeywords(e.target.value); setTagsCsv(e.target.value) }} />
             </div>
             <div>
               <label className="text-sm font-medium">Canonical URL</label>
@@ -356,11 +399,29 @@ export default function EditArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">OG Description</label>
-              <textarea value={ogDescription} onChange={(e) => setOgDescription(e.target.value)} className="mt-1 w-full rounded border p-2" rows={4} />
+              <Textarea value={ogDescription} onChange={(e) => setOgDescription(e.target.value)} className="mt-1" rows={4} />
             </div>
             <div>
               <label className="text-sm font-medium">OG Image URL</label>
-              <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} />
+              <div className="flex items-center gap-2">
+                <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    try {
+                      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                      const data = await res.json()
+                      if (data.url) setOgImageUrl(data.url)
+                    } catch {}
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Recommended 1200×630 JPG/PNG, under 2MB.</p>
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex gap-2">

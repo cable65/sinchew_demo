@@ -339,6 +339,7 @@ const MenuBar = ({ editor, showSource, toggleSource }: { editor: any, showSource
 
 export function RichTextEditor({ value, onChange, placeholder }: Props) {
   const [showSource, setShowSource] = useState(false)
+  const [wordCount, setWordCount] = useState(() => (value.trim().match(/\S+/g) || []).length)
   
   const editor = useEditor({
     extensions: [
@@ -361,6 +362,11 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
     onUpdate: ({ editor }) => {
       if (!showSource) {
         onChange(editor.getHTML())
+        try {
+          const text = editor.getText()
+          const count = (text.trim().match(/\S+/g) || []).length
+          setWordCount(count)
+        } catch {}
       }
     },
     editorProps: {
@@ -402,6 +408,7 @@ export function RichTextEditor({ value, onChange, placeholder }: Props) {
       ) : (
         <EditorContent editor={editor} />
       )}
+      <div className="flex justify-end px-3 py-1 text-xs text-muted-foreground border-t bg-gray-50">Word count: {wordCount}</div>
     </div>
   )
 }

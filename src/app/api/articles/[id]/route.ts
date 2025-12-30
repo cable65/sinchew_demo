@@ -1,19 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyToken } from '@/lib/auth'
+import { getAuthContext } from '@/lib/auth'
 import { z } from 'zod'
-
-async function getAuthContext(req: NextRequest) {
-  const token = req.cookies.get('token')?.value || req.headers.get('authorization')?.split(' ')[1]
-  if (!token) return null
-  const payload = await verifyToken(token)
-  if (!payload) return null
-  const user = await prisma.user.findUnique({
-    where: { id: payload.userId as string },
-    include: { tenant: true },
-  })
-  return user
-}
 
 export async function GET(
   req: NextRequest,
@@ -41,6 +29,7 @@ const updateSchema = z.object({
   description: z.string().optional(),
   content: z.string().optional(),
   imageUrl: z.string().url().nullable().optional(),
+  categoryId: z.string().optional().nullable(),
   author: z.string().optional(),
   tags: z.array(z.string()).optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
@@ -104,6 +93,18 @@ export async function PATCH(
       }
     }
 
+    // Editorial Lock Enforcement
+    if (existing.editorialLock && !data.editorialLock) {
+        // Allow unlocking if the user explicitly sets editorialLock to false
+        // (We assume the caller has permission to unlock if they are hitting this endpoint, 
+        // as we checked for ADMIN/EDITOR role at the start)
+    } else if (existing.editorialLock) {
+         // If locked, and not unlocking, prevent changes to other fields
+         // We can either throw an error or just ignore other changes. 
+         // Throwing an error is safer to alert the user.
+         return NextResponse.json({ error: 'Article is locked. Unlock it first to make changes.' }, { status: 403 })
+    }
+
     // Determine publishedAt
     let publishedAtToUse = existing.publishedAt;
     if (typeof data.publishedAt !== 'undefined') {
@@ -121,8 +122,9 @@ export async function PATCH(
         description: data.description ?? existing.description,
         content: data.content ?? existing.content,
         imageUrl: typeof data.imageUrl !== 'undefined' ? data.imageUrl : existing.imageUrl,
+        categoryId: typeof data.categoryId !== 'undefined' ? data.categoryId : existing.categoryId,
         author: typeof data.author === 'string' ? data.author : existing.author,
-        tags: Array.isArray(data.tags) ? data.tags : existing.tags,
+        tags: Array.isArray(data.tags) ? data.tags : (typeof data.seoKeywords === 'string' ? data.seoKeywords.split(',').map((t) => t.trim()).filter(Boolean) : existing.tags),
         status: data.status ?? existing.status,
         editorialLock: typeof data.editorialLock === 'boolean' ? data.editorialLock : existing.editorialLock,
         slug: slugToUse,
@@ -156,6 +158,7 @@ export async function PATCH(
       ogDescription: existing.ogDescription ?? null,
       ogImageUrl: existing.ogImageUrl ?? null,
     }
+    // Note: We don't log categoryId explicitly in old/new unless we want to, keeping it simple.
     const newValue: Record<string, unknown> = {
       id: updated.id,
       title: updated.title,

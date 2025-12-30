@@ -9,6 +9,8 @@ const navItems = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/articles', label: 'Articles', icon: Newspaper },
   { href: '/dashboard/sources', label: 'News Sources', icon: Rss },
+  { href: '/dashboard/admin/categories', label: 'Categories', icon: LayoutDashboard }, // Using LayoutDashboard temporarily
+  { href: '/dashboard/admin/users', label: 'Users', icon: Settings },
   { href: '/dashboard/admin/audit-logs', label: 'Audit Logs', icon: ShieldAlert },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
@@ -16,10 +18,18 @@ const navItems = [
 interface SidebarProps {
   platformName?: string
   className?: string
+  userRole?: string
 }
 
-export function Sidebar({ platformName, className }: SidebarProps) {
+export function Sidebar({ platformName, className, userRole }: SidebarProps) {
   const pathname = usePathname()
+
+  const filteredNavItems = navItems.filter(item => {
+    if (item.href.includes('/admin/')) {
+      return userRole === 'ADMIN'
+    }
+    return true
+  })
 
   return (
     <div className={cn("flex h-full w-64 flex-col border-r bg-gray-100/40 dark:bg-gray-800/40", className)}>
@@ -30,7 +40,7 @@ export function Sidebar({ platformName, className }: SidebarProps) {
       </div>
       <div className="flex-1 overflow-auto py-4">
         <nav className="grid items-start px-4 text-sm font-medium">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon
             return (
               <Link

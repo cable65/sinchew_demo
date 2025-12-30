@@ -9,8 +9,10 @@ erDiagram
     Tenant ||--o{ User : "has"
     Tenant ||--o{ NewsSource : "manages"
     Tenant ||--o{ Article : "owns"
+    Tenant ||--o{ Category : "defines"
     User ||--o{ Article : "creates"
     NewsSource ||--o{ Article : "produces"
+    Category ||--o{ Article : "classifies"
 
     Tenant {
         string id PK
@@ -49,11 +51,22 @@ erDiagram
         datetime updatedAt
     }
 
+    Category {
+        string id PK
+        string tenantId FK
+        string name
+        string slug UK
+        string description
+        datetime createdAt
+        datetime updatedAt
+    }
+
     Article {
         string id PK
         string tenantId FK
         string sourceId FK
         string creatorId FK
+        string categoryId FK
         string title
         string link
         string guid
@@ -108,6 +121,10 @@ Users belonging to a tenant.
 
 ### NewsSource
 External sources (RSS, API) configured for ingestion.
+
+### Category
+Taxonomy for classifying articles.
+- `slug`: URL-friendly identifier.
 
 ### Article
 The core content unit.

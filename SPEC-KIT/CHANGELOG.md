@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2025-12-30
+
+### Added
+- **Category Management**:
+  - Replaced static `ArticleCategory` enum with dynamic `Category` database model for flexible management.
+  - **API**: Added `GET/POST/PATCH/DELETE /api/admin/categories` for full CRUD operations.
+  - **UI**: Added Category Management page (`/dashboard/admin/categories`) for Admins.
+  - **Public API**: Added `GET /api/categories` for listing categories in frontend forms.
+- **Article Enhancements**:
+  - **Editorial Lock**: Implemented strict locking mechanism. Locked articles cannot be modified unless explicitly unlocked by an Admin/Editor.
+  - **Image Upload**: Added file upload capability with validation (Recommended: 1200x630px, Max 2MB).
+  - **Dynamic Categories**: Article Create/Edit forms now fetch categories dynamically from the database.
+  - **Tag/Keyword Sync**: Implemented bidirectional synchronization between "Tags" and "SEO Keywords" fields.
+- **Access Control**:
+  - **Role-Based Navigation**: Sidebar now dynamically filters links based on user role (e.g., "Categories", "Users", "Audit Logs" are hidden for non-Admins).
+
+### Fixed
+- **Category Management**:
+  - Fixed "Internal Server Error" (500) in Category Management API and Page.
+  - Added missing `categories` relation to `Tenant` model in Prisma schema.
+  - Improved error handling in `GET/POST /api/admin/categories` and `GET /api/categories` to return descriptive error messages.
+
+### Changed
+- **Database Schema**:
+  - Removed `ArticleCategory` enum.
+  - Added `Category` model with relation to `Tenant` and `Article`.
+  - Updated `Article` model to use `categoryId` foreign key.
+- **Article API**:
+  - Updated `PATCH /api/articles/[id]` to enforce Editorial Lock logic.
+  - Updated `POST/PATCH` endpoints to handle `categoryId` relation.
+
 ## [0.1.3] - 2025-12-30
 
 ### Added

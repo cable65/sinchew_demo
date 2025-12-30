@@ -12,14 +12,21 @@ interface NewsSource {
   name: string
 }
 
+interface Category {
+  id: string
+  name: string
+}
+
 export default function CreateArticlePage() {
   const [sources, setSources] = useState<NewsSource[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [sourceId, setSourceId] = useState('')
   const [title, setTitle] = useState('')
   const [link, setLink] = useState('')
   const [description, setDescription] = useState('')
   const [content, setContent] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [categoryId, setCategoryId] = useState('')
   const [author, setAuthor] = useState('')
   const [tagsCsv, setTagsCsv] = useState('')
   const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED' | 'ARCHIVED'>('DRAFT')
@@ -41,14 +48,23 @@ export default function CreateArticlePage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/sources')
-        const data = await res.json()
-        if (data.data) {
-          setSources(data.data)
-          if (data.data.length > 0) setSourceId(data.data[0].id)
+        const [srcRes, catRes] = await Promise.all([
+          fetch('/api/sources'),
+          fetch('/api/categories')
+        ])
+        const srcData = await srcRes.json()
+        const catData = await catRes.json()
+        
+        if (srcData.data) {
+          setSources(srcData.data)
+          if (srcData.data.length > 0) setSourceId(srcData.data[0].id)
+        }
+        if (catData.data) {
+          setCategories(catData.data)
+          if (catData.data.length > 0) setCategoryId(catData.data[0].id)
         }
       } catch (err) {
-        console.error('Failed to fetch sources', err)
+        console.error('Failed to fetch data', err)
       } finally {
         setLoading(false)
       }
@@ -83,14 +99,15 @@ export default function CreateArticlePage() {
           description,
           content,
           imageUrl: imageUrl || null,
+          categoryId: categoryId || null,
           author,
-          tags: tagsCsv.split(',').map(t => t.trim()).filter(Boolean),
+          tags: (seoKeywords || tagsCsv).split(',').map(t => t.trim()).filter(Boolean),
           status,
           editorialLock,
           slug,
           seoTitle,
           seoDescription,
-          seoKeywords,
+          seoKeywords: (tagsCsv || seoKeywords),
           canonicalUrl,
           ogTitle,
           ogDescription,
@@ -147,15 +164,40 @@ export default function CreateArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">Image URL</label>
-              <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+              <div className="flex items-center gap-2">
+                <Input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    try {
+                      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                      const data = await res.json()
+                      if (data.url) setImageUrl(data.url)
+                    } catch {}
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Recommended 1200×630 JPG/PNG, under 2MB.</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Category</label>
+              <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} className="mt-1 w-full rounded border p-2">
+                <option value="">Select a category</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </div>
             <div>
               <label className="text-sm font-medium">Author</label>
               <Input value={author} onChange={(e) => setAuthor(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium">Tags (comma separated)</label>
-              <Input value={tagsCsv} onChange={(e) => setTagsCsv(e.target.value)} />
+              <label className="text-sm font-medium">Tags / SEO Keywords (comma separated)</label>
+              <Input value={tagsCsv} onChange={(e) => { setTagsCsv(e.target.value); setSeoKeywords(e.target.value) }} />
             </div>
             <div>
               <label className="text-sm font-medium">Status</label>
@@ -183,7 +225,7 @@ export default function CreateArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">SEO Keywords (comma separated)</label>
-              <Input value={seoKeywords} onChange={(e) => setSeoKeywords(e.target.value)} />
+              <Input value={seoKeywords} onChange={(e) => { setSeoKeywords(e.target.value); setTagsCsv(e.target.value) }} />
             </div>
             <div>
               <label className="text-sm font-medium">Canonical URL</label>
@@ -199,7 +241,25 @@ export default function CreateArticlePage() {
             </div>
             <div>
               <label className="text-sm font-medium">OG Image URL</label>
-              <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} />
+              <div className="flex items-center gap-2">
+                <Input value={ogImageUrl} onChange={(e) => setOgImageUrl(e.target.value)} />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    const fd = new FormData()
+                    fd.append('file', file)
+                    try {
+                      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+                      const data = await res.json()
+                      if (data.url) setOgImageUrl(data.url)
+                    } catch {}
+                  }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Recommended 1200×630 JPG/PNG, under 2MB.</p>
             </div>
             <div className="flex gap-2">
               <Button onClick={save} disabled={saving}>Create Article</Button>
