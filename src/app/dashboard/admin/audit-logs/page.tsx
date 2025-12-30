@@ -67,12 +67,12 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <ShieldAlert className="h-8 w-8 text-primary" />
           Audit Logs
         </h1>
-        <Button variant="outline" size="sm" onClick={() => fetchLogs(page)}>
+        <Button variant="outline" size="sm" onClick={() => fetchLogs(page)} className="w-full sm:w-auto">
           <RefreshCcw className="mr-2 h-4 w-4" />
           Refresh
         </Button>
@@ -99,16 +99,16 @@ export default function AuditLogsPage() {
             </div>
           ) : (
             <>
-              <div className="rounded-md border">
-                <Table>
+              <div className="rounded-md border relative w-full overflow-x-auto">
+                <Table className="w-full">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Timestamp</TableHead>
                       <TableHead>Actor</TableHead>
                       <TableHead>Action</TableHead>
-                      <TableHead>Resource</TableHead>
-                      <TableHead>IP Address</TableHead>
-                      <TableHead>Details</TableHead>
+                      <TableHead className="hidden md:table-cell">Resource</TableHead>
+                      <TableHead className="hidden lg:table-cell">IP Address</TableHead>
+                      <TableHead className="hidden xl:table-cell">Details</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -128,14 +128,14 @@ export default function AuditLogsPage() {
                             {log.action}
                           </span>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="hidden md:table-cell">
                           <div className="flex flex-col">
                             <span>{log.resourceType}</span>
                             <span className="text-xs text-gray-500">{log.resourceId.substring(0, 8)}...</span>
                           </div>
                         </TableCell>
-                        <TableCell>{log.ipAddress}</TableCell>
-                        <TableCell className="max-w-[200px] truncate text-xs text-gray-500">
+                        <TableCell className="hidden lg:table-cell">{log.ipAddress}</TableCell>
+                        <TableCell className="hidden xl:table-cell max-w-[200px] truncate text-xs text-gray-500">
                           {JSON.stringify(log.newValue)}
                         </TableCell>
                       </TableRow>

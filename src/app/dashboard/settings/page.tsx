@@ -22,11 +22,11 @@ export default function SettingsPage() {
   // Organization & System State (Tenant)
   const [tenant, setTenant] = useState<{
     name: string;
-    brandingConfig: { logoUrl?: string; enableBranding?: boolean };
+    brandingConfig: { logoUrl?: string; enableBranding?: boolean; platformName?: string };
     systemConfig: { defaultAiModel?: string; autoPublish?: boolean };
   }>({ 
     name: '', 
-    brandingConfig: { logoUrl: '', enableBranding: false },
+    brandingConfig: { logoUrl: '', enableBranding: false, platformName: '' },
     systemConfig: { defaultAiModel: 'gpt-4o', autoPublish: false }
   })
 
@@ -60,7 +60,7 @@ export default function SettingsPage() {
         const data = await res.json()
         setTenant({
           name: data.name || '',
-          brandingConfig: (data.brandingConfig as any) || { logoUrl: '', enableBranding: false },
+          brandingConfig: (data.brandingConfig as any) || { logoUrl: '', enableBranding: false, platformName: '' },
           systemConfig: (data.systemConfig as any) || { defaultAiModel: 'gpt-4o', autoPublish: false }
         })
       }
@@ -268,8 +268,23 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="org-logo">Logo URL</Label>
+                    <Label htmlFor="platform-name">Platform Name</Label>
                     <Input 
+                      id="platform-name" 
+                      value={tenant.brandingConfig.platformName || ''}
+                      onChange={(e) => setTenant({
+                        ...tenant, 
+                        brandingConfig: { ...tenant.brandingConfig, platformName: e.target.value }
+                      })}
+                      placeholder="My News Platform" 
+                    />
+                    <p className="text-[0.8rem] text-muted-foreground">
+                      This name will be displayed in the footer.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="org-logo">Logo URL</Label>
+                    <Input  
                       id="org-logo" 
                       value={tenant.brandingConfig.logoUrl || ''}
                       onChange={(e) => setTenant({

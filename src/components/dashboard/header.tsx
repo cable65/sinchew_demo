@@ -3,8 +3,13 @@
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { LogOut } from 'lucide-react'
+import { MobileSidebar } from '@/components/dashboard/mobile-sidebar'
 
-export function Header() {
+interface HeaderProps {
+  platformName?: string
+}
+
+export function Header({ platformName }: HeaderProps) {
   const router = useRouter()
 
   const handleLogout = async () => {
@@ -15,6 +20,7 @@ export function Header() {
 
   return (
     <header className="flex h-14 items-center gap-4 border-b bg-gray-100/40 px-6 dark:bg-gray-800/40">
+      <MobileSidebar platformName={platformName} />
       <div className="flex-1">
         <h1 className="text-lg font-semibold">Dashboard</h1>
       </div>

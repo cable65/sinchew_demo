@@ -13,14 +13,19 @@ const navItems = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  platformName?: string
+  className?: string
+}
+
+export function Sidebar({ platformName, className }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-gray-100/40 dark:bg-gray-800/40">
+    <div className={cn("flex h-full w-64 flex-col border-r bg-gray-100/40 dark:bg-gray-800/40", className)}>
       <div className="flex h-14 items-center border-b px-6">
         <Link href="/dashboard" prefetch={false} className="flex items-center gap-2 font-semibold">
-          <span className="text-xl font-bold">SinChew CMS</span>
+          <span className="text-xl font-bold">{platformName || 'SinChew CMS'}</span>
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-4">

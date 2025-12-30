@@ -64,11 +64,11 @@ export default function ArticlesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-3xl font-bold">Articles</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <form onSubmit={submitSearch} className="flex gap-2">
-            <Input placeholder="Search articles" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Input placeholder="Search articles" value={q} onChange={(e) => setQ(e.target.value)} className="w-full sm:w-auto" />
             <Button type="submit" variant="outline">Search</Button>
           </form>
           <Button asChild>
@@ -89,22 +89,22 @@ export default function ArticlesPage() {
       )}
 
       {!loading && articles.length > 0 && (
-        <div className="rounded-md border">
-          <Table>
+        <div className="rounded-md border relative w-full overflow-x-auto">
+          <Table className="w-full">
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Source</TableHead>
-                <TableHead>Author</TableHead>
+                <TableHead className="hidden md:table-cell">Author</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Published</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="hidden lg:table-cell">Published</TableHead>
+                <TableHead className="text-right sticky right-0 bg-white dark:bg-gray-950 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {articles.map((a) => (
                 <TableRow key={a.id}>
-                  <TableCell className="max-w-[400px]">
+                  <TableCell className="max-w-[200px] md:max-w-[400px]">
                     <div className="font-medium line-clamp-2" title={a.title}>
                       {a.title}
                     </div>
@@ -114,8 +114,8 @@ export default function ArticlesPage() {
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>{a.source?.name}</TableCell>
-                  <TableCell>{a.author || '-'}</TableCell>
+                  <TableCell className="whitespace-nowrap">{a.source?.name}</TableCell>
+                  <TableCell className="hidden md:table-cell whitespace-nowrap">{a.author || '-'}</TableCell>
                   <TableCell>
                     <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                       a.status === 'PUBLISHED' ? 'bg-green-50 text-green-700 ring-green-600/20' :
@@ -125,8 +125,8 @@ export default function ArticlesPage() {
                       {a.status || 'PUBLISHED'}
                     </span>
                   </TableCell>
-                  <TableCell>{a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Unpublished'}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="hidden lg:table-cell whitespace-nowrap">{a.publishedAt ? new Date(a.publishedAt).toLocaleDateString() : 'Unpublished'}</TableCell>
+                  <TableCell className="text-right whitespace-nowrap sticky right-0 bg-white dark:bg-gray-950 z-10 shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.1)]">
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/dashboard/articles/${a.id}`} prefetch={false}>Edit</Link>
                     </Button>

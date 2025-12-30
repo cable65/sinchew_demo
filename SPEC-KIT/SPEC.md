@@ -14,7 +14,7 @@ A comprehensive, multi-tenant news aggregator CMS platform designed for scalabil
 
 ### 3.1 Multi-Tenancy
 - **Isolation**: Row-level security (RLS) simulation via Prisma middleware/filters.
-- **Tenant Management**: Onboarding, branding, billing integration.
+- **Tenant Management**: Onboarding, branding, billing integration, platform naming.
 - **Roles**: Admin, Editor, Viewer.
 
 ### 3.2 News Source Management
@@ -64,6 +64,7 @@ A comprehensive, multi-tenant news aggregator CMS platform designed for scalabil
   - **Organization Settings** (Admin Only):
     - Site Name & Description.
     - Branding (Logo URL, Primary Color).
+    - Platform Name (displayed in Dashboard Footer).
     - Timezone & Date Format.
   - **System Configuration** (Admin Only):
     - AI Model Configuration.

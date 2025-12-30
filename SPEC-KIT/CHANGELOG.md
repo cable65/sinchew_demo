@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-12-30
+
+### Added
+- **Platform Branding**:
+  - Added "Platform Name" configuration to Organization Settings (Admin only).
+  - Implemented dynamic **Footer** in Dashboard Layout.
+  - Footer displays the configured Platform Name (or Tenant Name/Default) and dynamic Copyright Year.
+  - Updated **Sidebar** to display the configured Platform Name instead of hardcoded "SinChew CMS".
+- **Responsive Layout**:
+  - Implemented responsive Sidebar behavior.
+  - Sidebar is now hidden on mobile screens.
+  - Added **MobileSidebar** (hamburger menu) to the Header for mobile navigation.
+- **Development**:
+  - Pre-filled Login form with default Admin credentials for easier testing.
+- **Mobile Responsiveness**:
+  - **Articles Page**:
+    - Optimized layout for mobile devices.
+    - Added horizontal scrolling for data tables with `w-full` constraint.
+    - Made "Actions" column **sticky** to the right for easy access on mobile.
+    - Selectively hide less critical columns (Author, Published Date) on smaller screens.
+    - Stacked search and action buttons on mobile.
+  - **Audit Logs Page**:
+    - Optimized layout for mobile devices.
+    - Added horizontal scrolling for data tables with `w-full` constraint.
+    - Selectively hide less critical columns (Resource, IP, Details) on smaller screens.
+    - Improved header layout for mobile.
+  - **Dashboard Layout**:
+    - Reduced padding on mobile (`p-4` vs `p-6`) to maximize content area.
+    - Constrained main content width to prevent overflow issues.
+- **Documentation**:
+  - Updated SPEC.md to include Platform Naming in Organization Settings.
+
 ## [0.1.2] - 2025-12-29
 
 ### Added (Settings & Dashboard)

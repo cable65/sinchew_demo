@@ -98,7 +98,7 @@ erDiagram
 
 ### Tenant
 Represents an organization using the platform.
-- `brandingConfig`: JSON storing logo URL, colors, etc.
+- `brandingConfig`: JSON storing logo URL, colors, platform name, etc.
 - `systemConfig`: JSON storing global settings like AI model preference.
 
 ### User
