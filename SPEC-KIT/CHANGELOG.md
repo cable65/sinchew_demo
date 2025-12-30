@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dashboard**:
   - Fixed blank "Article Trends" graph view by ensuring zero-filling for missing dates.
   - Improved empty state handling: Displays "No data available" only when the entire dataset is empty (e.g., no articles at all), otherwise shows a continuous trend line (including zero-count days).
+  - Fixed Recharts rendering issue by wrapping `ResponsiveContainer` in an explicit height container inside `TabsContent`.
 
 ## [0.1.4] - 2025-12-30
 
