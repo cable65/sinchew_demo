@@ -4,12 +4,15 @@ export type AuditAction =
   | 'USER_LOGIN'
   | 'USER_LOGOUT'
   | 'USER_REGISTER'
+  | 'PASSWORD_CHANGE'
   | 'TENANT_CREATE'
   | 'TENANT_UPDATE'
   | 'SOURCE_CREATE'
   | 'SOURCE_UPDATE'
   | 'SOURCE_DELETE'
   | 'API_KEY_CREATE'
+  | 'AI_SEO_GENERATE'
+  | 'AI_GRAMMAR_CHECK'
   | 'SYSTEM_ERROR'
 
 export interface AuditLogParams {
