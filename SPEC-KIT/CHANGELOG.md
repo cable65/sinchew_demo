@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.10] - 2026-01-02
+
+### Fixed
+- **Deployment**:
+  - Moved `middleware.ts` to `src/middleware.ts` to align with Next.js project structure.
+  - Disabled `outputFileTracing` in `next.config.ts` to resolve `ENOENT: no such file or directory, open '.../middleware.js.nft.json'` error on Vercel.
+
 ## [0.1.9] - 2026-01-02
 
 ### Fixed
