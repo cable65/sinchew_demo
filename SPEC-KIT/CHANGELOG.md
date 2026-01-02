@@ -5,16 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.7] - 2025-12-30
-
-### Fixed
-- **Deployment**:
-  - Fixed TypeScript error in `src/lib/audit.ts` where `Record<string, unknown>` was incompatible with Prisma's `InputJsonValue`.
-  - Resolved `Next.js build worker exited with code: 1` during Vercel deployment.
-- **Dashboard**:
-  - Fixed blank "Article Trends" graph view by ensuring zero-filling for missing dates.
-  - Improved empty state handling: Displays "No data available" only when the entire dataset is empty (e.g., no articles at all), otherwise shows a continuous trend line (including zero-count days).
-  - Fixed Recharts rendering issue by wrapping `ResponsiveContainer` in an explicit height container inside `TabsContent`.
+## [0.1.8] - 2026-01-02
 
 ### Added (Architecture)
 - **API Infrastructure**:
@@ -25,6 +16,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation**:
   - Created `public/openapi.yaml` (OpenAPI 3.1 Spec) for comprehensive API documentation.
   - Updated `SPEC-KIT/API_CONTRACT.md` to reference the new OpenAPI spec and response standards.
+
+## [0.1.7] - 2025-12-30
+
+### Fixed
+- **Deployment**:
+  - Fixed TypeScript error in `src/lib/audit.ts` where `Record<string, unknown>` was incompatible with Prisma's `InputJsonValue`.
+  - Resolved `Next.js build worker exited with code: 1` during Vercel deployment.
+- **Dashboard**:
+  - Fixed blank "Article Trends" graph view by ensuring zero-filling for missing dates.
+  - Improved empty state handling: Displays "No data available" only when the entire dataset is empty (e.g., no articles at all), otherwise shows a continuous trend line (including zero-count days).
+  - Fixed Recharts rendering issue by wrapping `ResponsiveContainer` in an explicit height container inside `TabsContent`.
 
 ## [0.1.4] - 2025-12-30
 
